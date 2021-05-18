@@ -1,13 +1,17 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsString, IsNumber, IsNotEmpty, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 import { Location } from '../entities/location.entity';
 import { Address } from '../entities/address.entity';
-
+import { CreateLocationDto } from './locations.dto';
+import { CreateAddressDto } from './addresses.dto';
 
 export class CreateParkingDto {
     @IsNotEmpty()
-    readonly location: Location;
+    @ValidateNested()
+    @Type(() => CreateLocationDto)
+    readonly location: Location
 
     @IsBoolean()
     @IsNotEmpty()
@@ -18,6 +22,8 @@ export class CreateParkingDto {
     readonly city: string; 
 
     @IsNotEmpty()
+    @ValidateNested() 
+    @Type(() => CreateAddressDto)
     readonly address: Address;
 }
 

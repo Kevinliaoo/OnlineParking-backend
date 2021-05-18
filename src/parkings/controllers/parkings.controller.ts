@@ -3,14 +3,13 @@ import {
     Get, Post, Put, 
     Query, Body, Param,
     ParseIntPipe,
-    Inject
 } from '@nestjs/common'; 
 
 import { ParkingsService } from '../services/parkings.service';
 import { CreateParkingDto } from '../dtos/parkings.dto';
 
 import { ParseBooleanPipe } from '../../common/parse-boolean.pipe';
-
+import { CreateLocationDto } from '../dtos/locations.dto';
 
 @Controller('parkings')
 export class ParkingsController {
@@ -40,6 +39,7 @@ export class ParkingsController {
 
     @Post('/new')
     createNew(@Body() payload: CreateParkingDto) {
+        const location: CreateLocationDto = payload.location;
         this.parkingsSerivce.createNew(payload); 
         return payload;
     }
