@@ -1,13 +1,16 @@
 import { 
     Controller, 
-    Get, Post, Put, Delete, 
+    Get, Post, Put, 
     Query, Body, Param,
-    ParseIntPipe
+    ParseIntPipe,
+    Inject
 } from '@nestjs/common'; 
 
 import { ParkingsService } from '../services/parkings.service';
+import { CreateParkingDto } from '../dtos/parkings.dto';
 
 import { ParseBooleanPipe } from '../../common/parse-boolean.pipe';
+
 
 @Controller('parkings')
 export class ParkingsController {
@@ -29,10 +32,22 @@ export class ParkingsController {
  
     @Get('/')
     getAll(@Query('city') city: string, @Query('available', ParseBooleanPipe) available = false) {
-        if (available) {
-            return this.parkingsSerivce.getAvailablesByCity(city);
-        }
+        // if (available) {
+        //     return this.parkingsSerivce.getAvailablesByCity(city);
+        // }
         return this.parkingsSerivce.getAllByCity(city);
     }
+
+    @Post('/new')
+    createNew(@Body() payload: CreateParkingDto) {
+        this.parkingsSerivce.createNew(payload); 
+        return payload;
+    }
+
+    @Put('/:_id') 
+    toggleParking(@Param('_id') _id: string) {
+        return this.parkingsSerivce.toggleParking(_id);
+    }
+
 
 }

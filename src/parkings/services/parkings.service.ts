@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; 
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'; 
+import { Db } from 'mongodb';
 
 import { Parking } from '../entities/parking.entity.ts';
 
 @Injectable()
 export class ParkingsService {
+
+    constructor(@Inject('MONGO') private database: Db) {}
+
     private dummy: Parking[] = [
         {
             _id: "123a", 
@@ -21,6 +25,12 @@ export class ParkingsService {
     ]
 
     getAllByCity(city) {
+        const collection = this.database.collection('parkings');
+        return collection.find({}).toArray();
+    }
+    
+    getAllByCityy(city) {
+
         const parkings = this.dummy.filter(p => p.city === city); 
         if (!parkings) {
             return []
@@ -29,7 +39,7 @@ export class ParkingsService {
     }
 
     getAvailablesByCity(city) {
-        return this.getAllByCity(city).filter(p => p.available);
+        return this.getAllByCityy(city).filter(p => p.available);
     }
 
     findById(_id) {
@@ -45,5 +55,18 @@ export class ParkingsService {
             const { address } = p; 
             return address.streetName === streetName && address.number >= number
         })
+    }
+
+    createNew(payload) {
+        this.database.collection('parkings');
+    }
+
+    toggleParking(_id) {
+        const parkingSlot = this.dummy.find(p => p._id === _id); 
+        if (!parkingSlot) {
+            throw new NotFoundException(`Location #${_id} does not exist`);
+        }
+        parkingSlot.available = ! parkingSlot.available; 
+        return parkingSlot;
     }
 }
