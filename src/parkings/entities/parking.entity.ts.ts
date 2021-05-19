@@ -7,4 +7,6 @@ export class Parking {
     available: boolean;
     city: string; 
     address: Address; 
+    last_updated: string; 
+    counts: number;
 }

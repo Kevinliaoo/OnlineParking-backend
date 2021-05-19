@@ -1,72 +1,80 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'; 
-import { Db } from 'mongodb';
+import { Inject, Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common'; 
+import { Db, ObjectId } from 'mongodb';
 
 import { Parking } from '../entities/parking.entity.ts';
 
 @Injectable()
 export class ParkingsService {
 
+    private collection: string = 'parkings';
+
     constructor(@Inject('MONGO') private database: Db) {}
 
-    private dummy: Parking[] = [
-        {
-            _id: "123a", 
-            available: true, 
-            city: 'Taoyuan', 
-            address: {
-                streetName: 'Taoyuan road', 
-                number: 124
-            },
-            location: {
-                latitude: 123,
-                longitude: 124
-            }
+    async getAllByCity(city: string) {
+        try {
+            const collection: Parking[] = await this.database.collection(this.collection).find({ city }).toArray();
+            return collection
+        } catch(e) {
+            throw new InternalServerErrorException();
         }
-    ]
-
-    getAllByCity(city) {
-        const collection = this.database.collection('parkings');
-        return collection.find({}).toArray();
-    }
-    
-    getAllByCityy(city) {
-
-        const parkings = this.dummy.filter(p => p.city === city); 
-        if (!parkings) {
-            return []
-        }
-        return parkings;
     }
 
-    getAvailablesByCity(city) {
-        return this.getAllByCityy(city).filter(p => p.available);
+    async getAvailablesByCity(city: string) {
+        const parkings: Parking[] = await this.getAllByCity(city);
+        return parkings.filter((p) => p.available);
     }
 
-    findById(_id) {
-        const parking = this.dummy.find(p => p._id === _id); 
+    async findById(_id: ObjectId) {
+        const parking: Parking = await this.database.collection(this.collection).findOne({ _id });
         if (!parking) {
             throw new NotFoundException(`Location #${_id} does not exist`);
         }
         return parking;
     }
 
-    searchByStreet(city, streetName, number) {
-        return this.getAvailablesByCity(city).filter(p => {
-            const { address } = p; 
-            return address.streetName === streetName && address.number >= number
-        })
+    async searchByStreet(city: string, streetName: string, number: number) {
+        const parkings = await this.getAvailablesByCity(city);
+        return parkings.filter((p: Parking) => p.address.streetName === streetName && p.address.number >= number);
     }
 
-    createNew(payload) {
-        this.database.collection('parkings');
-    }
-
-    toggleParking(_id) {
-        const parkingSlot = this.dummy.find(p => p._id === _id); 
-        if (!parkingSlot) {
-            throw new NotFoundException(`Location #${_id} does not exist`);
+    async createNew(payload: Parking) {
+        payload.last_updated = this.getCurrentTime();
+        payload.counts = 0;
+        try {
+            const res = await this.database.collection(this.collection).insertOne(payload);
+            const id: string = res.insertedId;
+            return id;
+        } catch(e) {
+            throw new InternalServerErrorException()
         }
-        parkingSlot.available = ! parkingSlot.available; 
-        return parkingSlot;
+    }
+
+    async toggleParking(_id: ObjectId) {
+        const parking = await this.findById(_id);
+        try {
+            // Fields to change
+            const changes: { available: boolean, last_updated: string, counts?: number } = {
+                available: !parking.available, 
+                last_updated: this.getCurrentTime(), 
+            }
+            if (!parking.available) {
+                changes.counts = parking.counts + 1;
+            }
+            await this.database.collection(this.collection).updateOne(
+                { _id }, 
+                { $set: changes }
+            );
+            return {
+                ...parking, 
+                ...changes,
+            }
+        } catch(e) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    private getCurrentTime(): string {
+        const now = new Date(); 
+        return `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}`;
     }
 }

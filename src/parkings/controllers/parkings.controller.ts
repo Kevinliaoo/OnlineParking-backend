@@ -4,12 +4,12 @@ import {
     Query, Body, Param,
     ParseIntPipe,
 } from '@nestjs/common'; 
+import { ObjectId } from 'mongodb';
 
 import { ParkingsService } from '../services/parkings.service';
 import { CreateParkingDto } from '../dtos/parkings.dto';
 
 import { ParseBooleanPipe } from '../../common/parse-boolean.pipe';
-import { CreateLocationDto } from '../dtos/locations.dto';
 
 @Controller('parkings')
 export class ParkingsController {
@@ -26,27 +26,35 @@ export class ParkingsController {
 
     @Get('/:_id') 
     getById(@Param('_id') _id: string) {
-        return this.parkingsSerivce.findById(_id);
+        try {
+            const objectId = new ObjectId(_id); 
+            return this.parkingsSerivce.findById(objectId);
+        } catch(e) {
+            throw 'Invalid ID format';
+        }
     }
  
     @Get('/')
     getAll(@Query('city') city: string, @Query('available', ParseBooleanPipe) available = false) {
-        // if (available) {
-        //     return this.parkingsSerivce.getAvailablesByCity(city);
-        // }
+        if (available) {
+            return this.parkingsSerivce.getAvailablesByCity(city);
+        }
         return this.parkingsSerivce.getAllByCity(city);
     }
 
     @Post('/new')
     createNew(@Body() payload: CreateParkingDto) {
-        const location: CreateLocationDto = payload.location;
-        this.parkingsSerivce.createNew(payload); 
-        return payload;
+        return this.parkingsSerivce.createNew(payload); 
     }
 
     @Put('/:_id') 
     toggleParking(@Param('_id') _id: string) {
-        return this.parkingsSerivce.toggleParking(_id);
+        try {
+            const objectId = new ObjectId(_id);
+            return this.parkingsSerivce.toggleParking(objectId);
+        } catch(e) {
+            throw 'Invalid ID format'
+        }
     }
 
 
