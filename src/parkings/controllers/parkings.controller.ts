@@ -56,6 +56,4 @@ export class ParkingsController {
             throw 'Invalid ID format'
         }
     }
-
-
 }
