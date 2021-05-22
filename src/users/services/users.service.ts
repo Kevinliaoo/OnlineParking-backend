@@ -42,12 +42,51 @@ export class UsersService {
         }
     }
 
-    async findUserByUsername(username: string) {
+    async findUserByUsername(username: string, returnPsw?: boolean) {
         try {
             const user: User = await this.database.collection(this.collection).findOne({ username });
+            if (returnPsw) {
+                return user;
+            }
             return this.removePassword(user);
         } catch (e) {
             throw new NotFoundException('User not found')
+        }
+    }
+
+    async changePassword(newPassword: string, username: string) {
+        const foundUser = await this.findUserByUsername(username); 
+        if(!foundUser) {
+            throw new InternalServerErrorException(); 
+        }
+        const password = bcrypt.hashSync(newPassword, 5);
+        try {
+            const res = await this.database.collection(this.collection).updateOne({ username }, { $set: { password } })
+            return res.result.ok;
+        } catch(e) {
+            throw new InternalServerErrorException('Unable to change password');
+        }
+    }
+
+    async changeUsername(newUsername: string, username: string) {
+        const foundUser = await this.findUserByUsername(username); 
+        if(!foundUser) {
+            throw new InternalServerErrorException(); 
+        }
+
+        try {
+            const existUser = await this.findUserByUsername(newUsername);
+            return new InternalServerErrorException('The username is already registered');
+        } catch(e) {}
+        
+        try {
+            const res = await this.database.collection(this.collection).updateOne(
+                { username },
+                { $set: { username: newUsername } }
+            );
+            return res.result.ok;
+        } catch(e) {
+            throw new InternalServerErrorException('Unable to update username');
         }
     }
 

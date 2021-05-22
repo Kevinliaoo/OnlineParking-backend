@@ -2,11 +2,12 @@ import {
     Controller, 
     Get, Post, 
     Body,
-    Param
+    Param,
+    Put
 } from '@nestjs/common'; 
 
 import { UsersService } from '../services/users.service';
-import { CreateUserDto } from '../dtos/users.dto';
+import { CreateUserDto, UpdateUserPasswordDto, UpdateUserUsernameDto } from '../dtos/users.dto';
 
 
 @Controller('users')
@@ -25,7 +26,17 @@ export class UsersController {
     }
 
     @Post('/') 
-    async createNew(@Body() payload: CreateUserDto) {
+    createNew(@Body() payload: CreateUserDto) {
         return this.usersService.createNewUser(payload);
+    }
+
+    @Put('/changePass/:username')
+    changeUserPassword(@Body() { newPassword }: UpdateUserPasswordDto, @Param('username') username: string) {
+        return this.usersService.changePassword(newPassword, username);
+    }
+
+    @Put('/changeUsername/:username') 
+    changeUsername(@Body() { newUsername }: UpdateUserUsernameDto, @Param('username') username: string) {
+        return this.usersService.changeUsername(newUsername, username);
     }
 }

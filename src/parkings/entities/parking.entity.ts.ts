@@ -9,4 +9,5 @@ export class Parking {
     address: Address; 
     last_updated: string; 
     counts: number;
+    user: string;
 }

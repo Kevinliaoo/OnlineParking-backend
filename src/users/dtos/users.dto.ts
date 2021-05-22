@@ -19,4 +19,16 @@ export class CreateUserDto {
     readonly lastName: string;
 }
 
+export class UpdateUserPasswordDto {
+    @IsNotEmpty()
+    @IsString() 
+    readonly newPassword: string;
+}
+
+export class UpdateUserUsernameDto {
+    @IsNotEmpty() 
+    @IsString() 
+    readonly newUsername: string;
+}
+
 export class UpdateUserDto extends PartialType(CreateUserDto) {}

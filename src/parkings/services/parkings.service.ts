@@ -40,6 +40,7 @@ export class ParkingsService {
     async createNew(payload: Parking) {
         payload.last_updated = this.getCurrentTime();
         payload.counts = 0;
+        payload.user = "";
         try {
             const res = await this.database.collection(this.collection).insertOne(payload);
             const id: string = res.insertedId;
