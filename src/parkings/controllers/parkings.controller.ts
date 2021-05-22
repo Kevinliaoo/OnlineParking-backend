@@ -3,13 +3,19 @@ import {
     Get, Post, Put, 
     Query, Body, Param,
     ParseIntPipe,
+    UseGuards, Req
 } from '@nestjs/common'; 
 import { ObjectId } from 'mongodb';
+import { Request } from 'express';
 
 import { ParkingsService } from '../services/parkings.service';
+
 import { CreateParkingDto } from '../dtos/parkings.dto';
 
 import { ParseBooleanPipe } from '../../common/parse-boolean.pipe';
+
+import { JwtAuthGuard } from '../../users/guards/jwt-auth.guard';
+import { PayloadToken } from '../../users/entities/token.entity';
 
 @Controller('parkings')
 export class ParkingsController {
@@ -42,8 +48,16 @@ export class ParkingsController {
         return this.parkingsSerivce.getAllByCity(city);
     }
 
+    // Use jwt strategy 
+    @UseGuards(JwtAuthGuard)
     @Post('/new')
-    createNew(@Body() payload: CreateParkingDto) {
+    createNew(@Body() payload: CreateParkingDto, @Req() req: Request) {
+        /**
+         * En esta línea estoy obteniendo el payload en el JWT
+         */
+        const jwtData = req.user as PayloadToken;
+        console.log(jwtData.username); 
+        console.log(jwtData.sub);
         return this.parkingsSerivce.createNew(payload); 
     }
 
