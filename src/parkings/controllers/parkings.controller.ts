@@ -61,11 +61,13 @@ export class ParkingsController {
         return this.parkingsSerivce.createNew(payload); 
     }
 
+    @UseGuards(JwtAuthGuard)
     @Put('/:_id') 
-    toggleParking(@Param('_id') _id: string) {
+    toggleParking(@Param('_id') _id: string, @Req() req: Request) {
         try {
+            const { sub } = req.user as PayloadToken;
             const objectId = new ObjectId(_id);
-            return this.parkingsSerivce.toggleParking(objectId);
+            return this.parkingsSerivce.toggleParking(objectId, sub);
         } catch(e) {
             throw 'Invalid ID format'
         }

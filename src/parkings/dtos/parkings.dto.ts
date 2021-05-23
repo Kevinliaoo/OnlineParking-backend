@@ -13,10 +13,6 @@ export class CreateParkingDto {
     @Type(() => CreateLocationDto)
     readonly location: Location
 
-    @IsBoolean()
-    @IsNotEmpty()
-    readonly available: boolean;
-
     @IsString() 
     @IsNotEmpty()
     readonly city: string; 
@@ -26,5 +22,3 @@ export class CreateParkingDto {
     @Type(() => CreateAddressDto)
     readonly address: Address;
 }
-
-export class UpdateParkingDto extends PartialType(CreateParkingDto) {}

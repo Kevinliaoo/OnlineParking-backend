@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common'; 
 import { Db, ObjectId } from 'mongodb';
 
-import { Parking } from '../entities/parking.entity.ts';
+import { Parking, UpdateParking } from '../entities/parking.entity.ts';
 
 @Injectable()
 export class ParkingsService {
@@ -41,6 +41,8 @@ export class ParkingsService {
         payload.last_updated = this.getCurrentTime();
         payload.counts = 0;
         payload.user = "";
+        payload.available = true;
+        
         try {
             const res = await this.database.collection(this.collection).insertOne(payload);
             const id: string = res.insertedId;
@@ -50,16 +52,18 @@ export class ParkingsService {
         }
     }
 
-    async toggleParking(_id: ObjectId) {
+    async toggleParking(_id: ObjectId, user_id: string) {
         const parking = await this.findById(_id);
         try {
             // Fields to change
-            const changes: { available: boolean, last_updated: string, counts?: number } = {
+            const changes: UpdateParking = {
                 available: !parking.available, 
                 last_updated: this.getCurrentTime(), 
+                user: user_id,
             }
             if (!parking.available) {
                 changes.counts = parking.counts + 1;
+                changes.user = "";
             }
             await this.database.collection(this.collection).updateOne(
                 { _id }, 
@@ -76,6 +80,6 @@ export class ParkingsService {
 
     private getCurrentTime(): string {
         const now = new Date(); 
-        return `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}`;
+        return `${now.getFullYear()}/${now.getMonth()}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
     }
 }

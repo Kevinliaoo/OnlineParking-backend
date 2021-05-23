@@ -11,3 +11,10 @@ export class Parking {
     counts: number;
     user: string;
 }
+
+export class UpdateParking {
+    available: boolean;
+    last_updated: string;
+    user: string; 
+    counts?: number;
+}
