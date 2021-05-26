@@ -3,7 +3,7 @@ import {
     Get, Post, Put, 
     Query, Body, Param,
     ParseIntPipe,
-    UseGuards, Req
+    UseGuards, Req, UsePipes
 } from '@nestjs/common'; 
 import { ObjectId } from 'mongodb';
 import { Request } from 'express';
