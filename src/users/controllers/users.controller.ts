@@ -3,12 +3,13 @@ import {
     Get, Post, 
     Body,
     Param,
-    Put
+    Put,
 } from '@nestjs/common'; 
 
 import { UsersService } from '../services/users.service';
 import { CreateUserDto, UpdateUserPasswordDto, UpdateUserUsernameDto } from '../dtos/users.dto';
 
+import { ParseUserPipe, ParseUsernamePipe, ParseNewUsernamePipe } from '../../common/parse-user.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -21,22 +22,22 @@ export class UsersController {
     }
 
     @Get('/username/:username') 
-    findByUsername(@Param('username') username: string) {
+    findByUsername(@Param('username', ParseUsernamePipe) username: string) {
         return this.usersService.findUserByUsername(username);
     }
 
     @Post('/') 
-    createNew(@Body() payload: CreateUserDto) {
+    createNew(@Body(ParseUserPipe) payload: CreateUserDto) {
         return this.usersService.createNewUser(payload);
     }
 
     @Put('/changePass/:username')
-    changeUserPassword(@Body() { newPassword }: UpdateUserPasswordDto, @Param('username') username: string) {
+    changeUserPassword(@Body() { newPassword }: UpdateUserPasswordDto, @Param('username', ParseUsernamePipe) username: string) {
         return this.usersService.changePassword(newPassword, username);
     }
 
     @Put('/changeUsername/:username') 
-    changeUsername(@Body() { newUsername }: UpdateUserUsernameDto, @Param('username') username: string) {
+    changeUsername(@Body(ParseNewUsernamePipe) { newUsername }: UpdateUserUsernameDto, @Param('username', ParseUsernamePipe) username: string) {
         return this.usersService.changeUsername(newUsername, username);
     }
 }
