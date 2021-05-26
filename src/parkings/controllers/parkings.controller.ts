@@ -56,8 +56,6 @@ export class ParkingsController {
          * En esta línea estoy obteniendo el payload en el JWT
          */
         const jwtData = req.user as PayloadToken;
-        console.log(jwtData.username); 
-        console.log(jwtData.sub);
         return this.parkingsSerivce.createNew(payload); 
     }
 

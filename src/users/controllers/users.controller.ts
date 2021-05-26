@@ -4,12 +4,17 @@ import {
     Body,
     Param,
     Put,
+    UseGuards,
+    Req,
 } from '@nestjs/common'; 
 
 import { UsersService } from '../services/users.service';
 import { CreateUserDto, UpdateUserPasswordDto, UpdateUserUsernameDto } from '../dtos/users.dto';
 
 import { ParseUserPipe, ParseUsernamePipe, ParseNewUsernamePipe } from '../../common/parse-user.pipe';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import { PayloadToken } from '../entities/token.entity';
 
 @Controller('users')
 export class UsersController {
@@ -24,6 +29,16 @@ export class UsersController {
     @Get('/username/:username') 
     findByUsername(@Param('username', ParseUsernamePipe) username: string) {
         return this.usersService.findUserByUsername(username);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/me') 
+    getMe(@Req() req: Request) {
+        const jwtData = req.user as PayloadToken; 
+        return {
+            username: jwtData.username, 
+            _id: jwtData.sub,
+        }
     }
 
     @Post('/') 
