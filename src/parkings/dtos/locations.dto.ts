@@ -3,9 +3,9 @@ import { IsNumber, IsNotEmpty } from 'class-validator';
 export class CreateLocationDto {
     @IsNumber()
     @IsNotEmpty()
-    readonly latitude: number;
+    readonly lat: number;
 
     @IsNumber()
     @IsNotEmpty()
-    readonly longitude: number;
+    readonly lng: number;
 }
