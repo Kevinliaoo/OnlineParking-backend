@@ -24,6 +24,7 @@ export class UsersService {
         }
 
         payload.password = bcrypt.hashSync(payload.password, 5);
+        payload.occupied = '';
         try {
             await this.database.collection(this.collection).insertOne(payload);
             return this.removePassword(payload); 
@@ -87,6 +88,32 @@ export class UsersService {
             return res.result.ok;
         } catch(e) {
             throw new InternalServerErrorException('Unable to update username');
+        }
+    }
+
+    async toggleParking (username: string, parkingId: string) {
+        let toConvert = ''; 
+
+        const user: User = await this.findUserByUsername(username);
+        if (user.occupied === '') {
+            toConvert = parkingId;
+        } 
+        else if (user.occupied !== '') {
+            if (user.occupied === parkingId) {
+                toConvert = '';
+            }
+            else {
+                throw new InternalServerErrorException();
+            }
+        }
+        try {
+            await this.database.collection(this.collection).updateOne(
+                { username },
+                { $set: { occupied: toConvert } }
+            )
+            return parkingId;
+        } catch(e) {
+            throw new InternalServerErrorException();
         }
     }
 

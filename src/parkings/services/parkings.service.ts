@@ -13,7 +13,25 @@ export class ParkingsService {
     async getAllByCity(city: string) {
         try {
             const collection: Parking[] = await this.database.collection(this.collection).find({ city }).toArray();
-            return collection
+            return collection;
+        } catch(e) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async getAll() {
+        try {
+            const collection: Parking[] = await this.database.collection(this.collection).find({}).toArray();
+            return collection;
+        } catch(e) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async getAllAvailables() {
+        try {
+            const collection: Parking[] = await this.database.collection(this.collection).find({available: true}).toArray();
+            return collection;
         } catch(e) {
             throw new InternalServerErrorException();
         }

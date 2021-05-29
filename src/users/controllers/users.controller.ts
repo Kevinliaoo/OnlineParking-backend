@@ -35,15 +35,21 @@ export class UsersController {
     @Get('/me') 
     getMe(@Req() req: Request) {
         const jwtData = req.user as PayloadToken; 
-        return {
-            username: jwtData.username, 
-            _id: jwtData.sub,
-        }
+        const username: string = jwtData.username;
+
+        return this.usersService.findUserByUsername(username);
     }
 
     @Post('/') 
     createNew(@Body(ParseUserPipe) payload: CreateUserDto) {
         return this.usersService.createNewUser(payload);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Put('/parking/:parkingId') 
+    toggleParking(@Param('parkingId') parkingId: string, @Req() req: Request) {
+        const username = (req.user as PayloadToken).username;
+        return this.usersService.toggleParking(username, parkingId);
     }
 
     @Put('/changePass/:username')

@@ -43,9 +43,9 @@ export class ParkingsController {
     @Get('/')
     getAll(@Query('city') city: string, @Query('available', ParseBooleanPipe) available = false) {
         if (available) {
-            return this.parkingsSerivce.getAvailablesByCity(city);
+            return this.parkingsSerivce.getAllAvailables();
         }
-        return this.parkingsSerivce.getAllByCity(city);
+        return this.parkingsSerivce.getAll();
     }
 
     // Use jwt strategy 
